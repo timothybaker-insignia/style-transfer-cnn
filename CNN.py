@@ -1,104 +1,177 @@
-from itertools import count
-
-# class for abstracting the building of layers in Tensorflow
-class Layer:
-    _ids = count(0)
-
-    def __init__(self, layertype, dimensions, inputchannels, outputchannels, padding, activation, kernelsize, stride):
-        self.id = next(self._ids)
-        self.layertype = layertype
-        self.dimensions = dimensions
-        self.inputchannels = inputchannels
-        self.outputchannels = outputchannels
-        self.padding = padding
-        self.activation = activation
-        self.kernelsize = kernelsize
-        self.stride = stride
-        self.layertypes = ['convolution', 'conv-inception', 'connected']
-        self.paddings = ['same', 'valid']
-        self.activations = ['relu', 'leaky relu', 'sigmoid', 'linear', 'tangent']
-        self.selfCheck()
-        
-    def selfCheck(self):
-        # check that layertype is a valid string
-        if not type(self.layertype) == str:
-            raise TypeError 
-        if not self.layertype in self.layertypes:
-            raise ValueError
-        # check that dimensions is an int x s.t. 0 < x < 4
-        if not type(self.dimensions) == int:
-            raise TypeError
-        if not (self.dimensions > 0 and self.dimensions < 4):
-            raise ValueError
-        # check that inputchannels is an integer
-        if not type(self.inputchannels) == int:
-            raise TypeError
-        # check that outputchannels is an integer
-        if not type(self.outputchannels) == int:
-            raise TypeError
-        # check padding for valid string
-        if not type(self.padding) == str:
-            raise TypeError
-        if not self.padding in self.paddingtypes:
-            raise ValueError
-        # check activation for valid string
-        if not type(self.activation) == str:
-            raise TypeError
-        if not self.activation in self.activations:
-            raise ValueError
-            
-    def convolution(
-            
-    def compute(self, batch):
-        if self.dimensions = 1:
-            if self.layertype = 'convolution':     
-                kernel = tf.Variable(tf.truncated_normal(
-                    [kernelsize, self.inputchannels, self.outputchannels], stddev=0.1))
-                l2 = tf.nn.l2_loss(kernel)                
-                batch = tf.nn.conv1d(batch, kernel, stride=self.stride, padding=self.padding) 
-            elif self.layertype = 'conv-inception':
-                pass
-            elif self.layertype = 'connected':
-                pass
-        elif self.dimensions = 2:
-            if self.layertype = 'convolution':
-                kernel = tf.Variable(tf.truncated_normal(
-                    [kernelsize, kernelsize, self.inputchannels, self.outputchannels], stddev=0.1))
-                l2 = tf.nn.l2_loss(kernel)                
-                batch = tf.nn.conv2d(batch, kernel, stride=self.stride, padding=self.padding) 
-            elif self.layertype = 'conv-inception':
-                pass
-            elif self.layertype = 'connected':
-                pass
-        elif self.dimensions = 3:
-            if self.layertype = 'convolution':
-                kernel = tf.Variable(tf.truncated_normal(
-                    [kernelsize, self.inputchannels, self.outputchannels], stddev=0.1))
-                l2 = tf.nn.l2_loss(kernel)                
-                batch = tf.nn.conv1d(batch, kernel, stride=self.stride, padding=self.padding) 
-            elif self.layertype = 'conv-inception':
-                pass
-            elif self.layertype = 'connected':
-                pass
-            
+from Layer import Layer
+         
 class CNN:
     def __init__(self):
         self.layers = []
         self.finalized = False
-        
-    def addLayer(self, layertype, dimensions, inputchannels, outputchannels, activation=None, padding='same', kernelsize=3, stride=1):
+
+    def addLayer(self, layertype):
+        if not layertype in ['maxpooling', 'dropout']:
+            raise ValueError('layertype must be maxpooling or dropout')
         if not self.finalized:
-            layer = Layer(layertype, dimensions, inputchannels, outputchannels, padding, activation, kernelsize, stride)
+            layer = Layer(layertype)
+        else:
+            print('Error: Cannot add layer after graph is finalized!')
+        
+    def addLayer(self, layertype, dimensions, inputchannels, outputchannels, activation='none', keepprob=1.0):
+        if not self.finalized:
+            layer = Layer(layertype, dimensions, inputchannels, outputchannels, activation, keepprob)
             self.layers.append(layer)
         else
-            print("Error: Cannot add layer after graph is finalized!")
+            print('Error: Cannot add layer after graph is finalized!')
         
+    def clearLayers(self):
+        self.layers = []
+
     def computationalGraph(self, batch):
         self.finalized = True
         for layer in layers:
             with tf.name_scope(layer.layertype + " " + layer.id)
                 batch = layer.compute(batch)
-                
         return batch
+
+    def train(self, sess, training_init_op, epochs):
+        for epoch in range(epochs):
+            epoch_start_time = time.time()
+            epoch_train_time = 0.0
+            epoch_train_loss = 0.0
+            epoch_train_acc = 0.0          
+
+            sess.run(training_init_op)
+            for iteration in range(training_iterations):
+                try:
+                    t_stime = time.time()
+                    _, lab, pred, loss_, acc = sess.run([train_step, label, prediction, total_loss, accuracy])
+                    t_etime = time.time()
+                    t_rtime = round((t_etime - t_stime) / 60, 4)
+                    epoch_train_time += t_rtime
+                except tf.errors.ResourceExhaustedError as err:
+                    print(err)
+                    sys.stdout.flush()
+                except tf.errors.OutOfRangeError as err:
+                    print(err)
+                    sys.stdout.flush()
+                except tf.errors.InternalError as err:
+                    print(err)
+                    sys.stdout.flush()
+                else:
+                    epoch_train_loss += loss_
+                    epoch_train_acc += acc
+                finally:
+                    pass
+
+            epoch_run_time = (time.time() - epoch_start_time) / 60
+            epoch_run_time = str(round(epoch_run_time, 2))
+            epoch_train_time = str(round(epoch_train_time, 2))
+            epoch_train_loss = str(round(epoch_train_loss / training_iterations,
+                4))
+            epoch_train_acc = str(round(epoch_train_acc / training_iterations,
+                4))
+            print("run-time:", epoch_run_time, "training time:",
+                epoch_train_time)
+            print("epoch", str(epoch), "training loss:", 
+                epoch_train_loss, "training acc:", epoch_train_acc)
+            sys.stdout.flush()  
+
+    def validate(self, sess, validation_init_op, epochs):
+        for epoch in range(epochs):
+            epoch_validation_loss = 0.0
+            epoch_validation_acc = 0.0
+            
+            sess.run(validation_init_op)
+            for iteration in range(validation_iterations):   
+                try:   
+                    lab, pred, loss_, acc = sess.run([label, prediction, loss, accuracy])
+                except tf.errors.ResourceExhaustedError as err:
+                    print(err)
+                    sys.stdout.flush()
+                except tf.errors.OutOfRangeError as err:
+                    print(err)
+                    sys.stdout.flush()
+                except tf.errors.InternalError as err:
+                    print(err)
+                    sys.stdout.flush()
+                else:
+                    epoch_validation_loss += loss_
+                    epoch_validation_acc += acc
+                finally:
+                    pass
+                
+            epoch_validation_loss = str(round(
+                epoch_validation_loss / validation_iterations, 4))
+            epoch_validation_acc = str(round(
+                epoch_validation_acc / validation_iterations, 4))
+            print("epoch", str(epoch), "validation loss:", 
+                epoch_validation_loss, "validation acc:", epoch_validation_acc)
+            sys.stdout.flush()  
         
+    def trainWithValidation(self, sess, training_init_op, validation_init_op, epochs):
+        for epoch in range(epochs):
+            epoch_start_time = time.time()
+            epoch_train_time = 0.0
+            epoch_train_loss = 0.0
+            epoch_train_acc = 0.0
+            epoch_validation_loss = 0.0
+            epoch_validation_acc = 0.0
+            
+            sess.run(training_init_op)
+            for iteration in range(training_iterations):
+                try:
+                    t_stime = time.time()
+                    _, lab, pred, loss_, acc = sess.run([train_step, label, prediction, total_loss, accuracy])
+                    t_etime = time.time()
+                    t_rtime = round((t_etime - t_stime) / 60, 4)
+                    epoch_train_time += t_rtime
+                except tf.errors.ResourceExhaustedError as err:
+                    print(err)
+                    sys.stdout.flush()
+                except tf.errors.OutOfRangeError as err:
+                    print(err)
+                    sys.stdout.flush()
+                except tf.errors.InternalError as err:
+                    print(err)
+                    sys.stdout.flush()
+                else:
+                    epoch_train_loss += loss_
+                    epoch_train_acc += acc
+                finally:
+                    pass
+
+            sess.run(validation_init_op)
+            for iteration in range(validation_iterations):   
+                try:   
+                    lab, pred, loss_, acc = sess.run([label, prediction, loss, accuracy])
+                except tf.errors.ResourceExhaustedError as err:
+                    print(err)
+                    sys.stdout.flush()
+                except tf.errors.OutOfRangeError as err:
+                    print(err)
+                    sys.stdout.flush()
+                except tf.errors.InternalError as err:
+                    print(err)
+                    sys.stdout.flush()
+                else:
+                    epoch_validation_loss += loss_
+                    epoch_validation_acc += acc
+                finally:
+                    pass
+                
+            epoch_validation_loss = str(round(
+                epoch_validation_loss / validation_iterations, 4))
+            epoch_validation_acc = str(round(
+                epoch_validation_acc / validation_iterations, 4))
+            epoch_run_time = (time.time() - epoch_start_time) / 60
+            epoch_run_time = str(round(epoch_run_time, 2))
+            epoch_train_time = str(round(epoch_train_time, 2))
+            epoch_train_loss = str(round(epoch_train_loss / training_iterations,
+                4))
+            epoch_train_acc = str(round(epoch_train_acc / training_iterations,
+                4))
+            print("run-time:", epoch_run_time, "training time:",
+                epoch_train_time)
+            print("epoch", str(epoch), "validation loss:", 
+                epoch_validation_loss, "validation acc:", epoch_validation_acc)
+            print("epoch", str(epoch), "training loss:", 
+                epoch_train_loss, "training acc:", epoch_train_acc)
+            sys.stdout.flush()  
         
