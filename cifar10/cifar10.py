@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -13,6 +11,8 @@ import tensorflow as tf
 tf.logging.set_verbosity(tf.logging.ERROR)
 
 from multiprocessing import cpu_count
+from Pillow import Image
+from sklearn.model_selection import train_test_split
 
 from CNN import CNN
 
@@ -82,18 +82,61 @@ def cifar10Model(keepprob=1.0):
     cifar10cnn.addLayer('fully connected', 256, NUM_CLASSES, activation='none', keepprob=1.0)
     return cifar10cnn
 
+def alphaLabelToNumLabel(key):
+    label_dict = {"airplane" : 0,
+                  "automobile" : 1,
+                  "bird" : 2,
+                  "cat" : 3,
+                  "deer" : 4,
+                  "dog" : 5,
+                  "frog" : 6, 
+                  "horse" : 7,
+                  "ship" : 8,
+                  "truck" : 9}
+    return label_dict[key]
+
+def numLabelToAlphaLabel(key):
+    label_dict = {0 : "airplane",
+                  1 : "automobile",
+                  2 : "bird",
+                  3 : "cat",
+                  4 : "deer",
+                  5 : "dog",
+                  6 : "frog", 
+                  7 : "horse",
+                  8 : "ship",
+                  9 : "truck"}
+    return label_dict[key]
+
+def loadTrainingAndValidationBatches():
+    batches = []
+    for i in range(10):
+        for filename in os.listdir("data/train/"+numLabelToAlphaLabel(i)):
+            im_frame = Image.open("data/train/"+numLabelToAlphaLabel(i) + "/" + filename)
+            np_frame = np.array(im_frame.getdata())
+            label = np.zeroes(10)
+            label[i] = 1
+            batches.append(np_frame, label, True) 
+    Random(0).shuffle(batches)
+    training, validation = train_test_split(batches)
+    return training, validation
+
+def loadTestingBatches():
+    batches = []
+    for i in range(10):
+        for filename in os.listdir("data/test/"+numLabelToAlphaLabel(i)):
+            im_frame = Image.open("data/test/"+numLabelToAlphaLabel(i) + "/" + filename)
+            np_frame = np.array(im_frame.getdata())
+            label = np.zeroes(10)
+            label[i] = 1
+            batches.append(np_frame, label, False) 
+    Random(0).shuffle(batches)
+    return batches
+
 def loadDatasets():
-    training_batches = loadBatches(TRAINING_LIST_PATH, TRAINING_PICKLE_PATH, 
-        CHAINS_PATH, LAYERS, is_chief=is_chief, is_training=True)
-    if CULL_OUTLIERS:
-        training_batches = removeOutlierChains(training_batches)
-    if is_chief:
-      printChainStats(training_batches, PLOTS_PATH + "trainingStats.txt")
-    if ROTATE_BATCHES:
-        training_batches = rotateBatches(training_batches)
+    training_batches, validation_batches = loadTrainingAndValidationBatches() 
     total_training_batches = len(training_batches)
     Random(0).shuffle(training_batches)                                    
-    training_batches.reverse() 
     training_iterations = int(len(training_batches) / BATCH_SIZE)
 
     def gen_training():
@@ -110,61 +153,31 @@ def loadDatasets():
     training_dataset = training_dataset.prefetch(buffer_size=1)
     print("loaded",total_training_batches,"training batches")
 
-    print("loading validation batches...")
-    sys.stdout.flush()
-    validation_batches = loadBatches(VALIDATION_LIST_PATH, VALIDATION_PICKLE_PATH)
-    if CULL_OUTLIERS:
-        validation_batches = removeOutlierChains(validation_batches)                
-    if is_chief:
-      printChainStats(validation_batches, PLOTS_PATH + "validationStats.txt")
     total_validation_batches = len(validation_batches)
     Random(0).shuffle(validation_batches)             
-    validation_iterations = int(len(validation_batches) 
-                                / BATCH_SIZE)
+    validation_iterations = int(len(validation_batches) / BATCH_SIZE)
     def gen_validation():
         for i in range(validation_iterations * BATCH_SIZE):
-            chains, batch, coords, orig, is_training, is_rotated = \
-                validation_batches[i]
-            yield (chains, batch, orig, coords, is_training, is_rotated)
-    validation_dataset = tf.data.Dataset.from_generator(gen_validation, (
-        (tf.string,tf.string,tf.string),(tf.float32,tf.float32,tf.float32,  
-        (tf.int64, tf.int64, tf.int64, tf.int64)),
-        (tf.int64,tf.int64,tf.int64,tf.int64,tf.int64,tf.int64),
-        (tf.int64,tf.int64,tf.int64,tf.int64,tf.int64,tf.int64), 
-          tf.bool, tf.bool))
-    validation_dataset = validation_dataset.map(
-        self_map, num_parallel_calls=1)
-    validation_dataset = validation_dataset.prefetch(
-        buffer_size=1)
+            batch, label, is_training = validation_batches[i]
+            yield (batch, label, is_training)
+    validation_dataset = tf.data.Dataset.from_generator(gen_validation, (tf.float16,tf.float16,tf.bool))
+    validation_dataset = validation_dataset.map(self_map, num_parallel_calls=1)
+    validation_dataset = validation_dataset.prefetch(buffer_size=1)
     print("loaded",total_validation_batches,"validation batches")
 
     print("loading testing batches...")
     sys.stdout.flush()
-    testing_batches = loadBatches(TESTING_LIST_PATH, TESTING_PICKLE_PATH, 
-        CHAINS_PATH, LAYERS, is_chief=is_chief, is_training=False)
-    if CULL_OUTLIERS:
-        testing_batches = removeOutlierChains(testing_batches)                
-    if is_chief:
-      printChainStats(testing_batches, PLOTS_PATH + "testingStats.txt")
+    testing_batches = loadTestingBatches()
     total_testing_batches = len(testing_batches)
     Random(0).shuffle(testing_batches)                                    
-    testing_iterations = int(len(testing_batches) 
-                            / BATCH_SIZE)
+    testing_iterations = int(len(testing_batches) / BATCH_SIZE)
     def gen_testing():
         for i in range(testing_iterations * BATCH_SIZE):
-            chains, batch, orig, coords, is_training, is_rotated = \
-                testing_batches[i]
-            yield (chains, batch, orig, coords, is_training, is_rotated)
-    testing_dataset = tf.data.Dataset.from_generator(gen_testing, 
-        ((tf.string,tf.string,tf.string),(tf.float32,tf.float32,tf.float32, 
-         (tf.int64, tf.int64, tf.int64, tf.int64)),
-         (tf.int64,tf.int64,tf.int64, tf.int64,tf.int64,tf.int64), 
-         (tf.int64,tf.int64,tf.int64,tf.int64,tf.int64,tf.int64),
-          tf.bool, tf.bool))
-    testing_dataset = testing_dataset.map(
-            self_map, num_parallel_calls=1)
-    testing_dataset = testing_dataset.prefetch(
-        buffer_size=1)
+            batch, label, is_training = testing_batches[i]
+            yield (batch, label, is_training)
+    testing_dataset = tf.data.Dataset.from_generator(gen_testing, (tf.float16,tf.float16,tf.bool))
+    testing_dataset = testing_dataset.map(self_map, num_parallel_calls=1)
+    testing_dataset = testing_dataset.prefetch(buffer_size=1)
     print("loaded",total_testing_batches,"testing batches")
     print("building computational graph...")
     sys.stdout.flush()
@@ -238,12 +251,9 @@ def main():
             finally:
                 pass
                 
-        epoch_test_loss = str(round(epoch_test_loss / testing_iterations,
-            4))
-        epoch_test_acc = str(round(epoch_test_acc / testing_iterations,
-            4))
-        print("testing loss:", 
-            epoch_test_loss, "testing acc:", epoch_test_acc)
+        epoch_test_loss = str(round(epoch_test_loss / testing_iterations,4))
+        epoch_test_acc = str(round(epoch_test_acc / testing_iterations,4))
+        print("testing loss:",epoch_test_loss, "testing acc:", epoch_test_acc)
         sys.stdout.flush()  
 
     end_time = (time.time() - start_time) / 60
