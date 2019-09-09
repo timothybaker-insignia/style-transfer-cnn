@@ -5,13 +5,16 @@ import errno
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import sys
+sys.dont_write_bytecode = True
+import time
 
 import numpy as np
 import tensorflow as tf
 tf.logging.set_verbosity(tf.logging.ERROR)
 
 from multiprocessing import cpu_count
-from Pillow import Image
+from PIL import Image
+from random import Random
 from sklearn.model_selection import train_test_split
 
 from CNN import CNN
@@ -38,10 +41,6 @@ LAMBDA_REG            =    0.001    # lambda for kernel regularization
 DATA_PATH = "data/"
 CHECKPOINT_PATH = "checkpoint/" 
 OUTPUT_PATH = "output/"
-PICKLE_PATH = DATA_PATH + "pickle/"
-TRAINING_PICKLE_PATH = PICKLE_PATH + "training_batch.pkl"
-VALIDATION_PICKLE_PATH = PICKLE_PATH + "validation_batch.pkl"
-TESTING_PICKLE_PATH = PICKLE_PATH + "testing_batch.pkl"
 
 if TEST_ONLY:
     EPOCHS = 0
@@ -53,10 +52,6 @@ def checkEnv():
 def setupEnv():
     if not os.path.exists(OUTPUT_PATH):
         os.makedirs(OUTPUT_PATH)
-    if not os.path.exists(PICKLE_PATH):
-        os.makedirs(PICKLE_PATH)
-    if not os.path.exists(PLOTS_PATH):
-        os.makedirs(PLOTS_PATH)
 
 def cifar10Model(keepprob=1.0):
     # create network model for training cifar 10
@@ -64,22 +59,22 @@ def cifar10Model(keepprob=1.0):
     # convolution layer 1
     cifar10cnn.addLayer('convolution', 2, 3, 32, activation='relu', keepprob=keepprob)
     cifar10cnn.addLayer('convolution', 2, 32, 32, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('maxpooling')
-    cifar10cnn.addLayer('dropout')
+    cifar10cnn.addLayer('maxpooling', 2)
+    cifar10cnn.addLayer('dropout', 2)
     # convolution layer 2
     cifar10cnn.addLayer('convolution', 2, 32, 64, activation='relu', keepprob=keepprob)
     cifar10cnn.addLayer('convolution', 2, 64, 64, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('maxpooling')
-    cifar10cnn.addLayer('dropout')
+    cifar10cnn.addLayer('maxpooling', 2)
+    cifar10cnn.addLayer('dropout', 2)
     # convolution layer 3
     cifar10cnn.addLayer('convolution', 2, 64, 128, activation='relu', keepprob=keepprob)
     cifar10cnn.addLayer('convolution', 2, 128, 128, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('maxpooling')
-    cifar10cnn.addLayer('dropout')
+    cifar10cnn.addLayer('maxpooling', 2)
+    cifar10cnn.addLayer('dropout', 2)
     # fully connected layer 1
-    cifar10cnn.addLayer('fully connected', 2, 128, 256, activation='none', keepprob=keepprob)
+    cifar10cnn.addLayer('connected', 2, 128, 256, activation='none', keepprob=keepprob)
     # fully connected layer 2
-    cifar10cnn.addLayer('fully connected', 256, NUM_CLASSES, activation='none', keepprob=1.0)
+    cifar10cnn.addLayer('connected', 2, 256, NUM_CLASSES, activation='none', keepprob=1.0)
     return cifar10cnn
 
 def alphaLabelToNumLabel(key):
@@ -114,9 +109,9 @@ def loadTrainingAndValidationBatches():
         for filename in os.listdir("data/train/"+numLabelToAlphaLabel(i)):
             im_frame = Image.open("data/train/"+numLabelToAlphaLabel(i) + "/" + filename)
             np_frame = np.array(im_frame.getdata())
-            label = np.zeroes(10)
+            label = np.zeros(10)
             label[i] = 1
-            batches.append(np_frame, label, True) 
+            batches.append((np_frame, label, True)) 
     Random(0).shuffle(batches)
     training, validation = train_test_split(batches)
     return training, validation
@@ -127,13 +122,15 @@ def loadTestingBatches():
         for filename in os.listdir("data/test/"+numLabelToAlphaLabel(i)):
             im_frame = Image.open("data/test/"+numLabelToAlphaLabel(i) + "/" + filename)
             np_frame = np.array(im_frame.getdata())
-            label = np.zeroes(10)
+            label = np.zeros(10)
             label[i] = 1
-            batches.append(np_frame, label, False) 
+            batches.append((np_frame, label, False)) 
     Random(0).shuffle(batches)
     return batches
 
 def loadDatasets():
+    print("loading training and validation batches")
+    sys.stdout.flush()
     training_batches, validation_batches = loadTrainingAndValidationBatches() 
     total_training_batches = len(training_batches)
     Random(0).shuffle(training_batches)                                    
@@ -147,11 +144,12 @@ def loadDatasets():
     def self_map(batch, label, is_training):
         return batch, label, is_training
 
-    training_dataset = tf.data.Dataset.from_generator(gen_training, (tf.float16,tf.float16,tf.bool))
+    training_dataset = tf.data.Dataset.from_generator(gen_training, (tf.float32,tf.float32,tf.bool))
     training_dataset = training_dataset.shuffle(buffer_size=BATCH_SIZE)
     training_dataset = training_dataset.map(self_map, num_parallel_calls=THREADS)
     training_dataset = training_dataset.prefetch(buffer_size=1)
     print("loaded",total_training_batches,"training batches")
+    sys.stdout.flush()
 
     total_validation_batches = len(validation_batches)
     Random(0).shuffle(validation_batches)             
@@ -160,10 +158,11 @@ def loadDatasets():
         for i in range(validation_iterations * BATCH_SIZE):
             batch, label, is_training = validation_batches[i]
             yield (batch, label, is_training)
-    validation_dataset = tf.data.Dataset.from_generator(gen_validation, (tf.float16,tf.float16,tf.bool))
+    validation_dataset = tf.data.Dataset.from_generator(gen_validation, (tf.float32,tf.float32,tf.bool))
     validation_dataset = validation_dataset.map(self_map, num_parallel_calls=1)
     validation_dataset = validation_dataset.prefetch(buffer_size=1)
     print("loaded",total_validation_batches,"validation batches")
+    sys.stdout.flush()
 
     print("loading testing batches...")
     sys.stdout.flush()
@@ -175,7 +174,7 @@ def loadDatasets():
         for i in range(testing_iterations * BATCH_SIZE):
             batch, label, is_training = testing_batches[i]
             yield (batch, label, is_training)
-    testing_dataset = tf.data.Dataset.from_generator(gen_testing, (tf.float16,tf.float16,tf.bool))
+    testing_dataset = tf.data.Dataset.from_generator(gen_testing, (tf.float32,tf.float32,tf.bool))
     testing_dataset = testing_dataset.map(self_map, num_parallel_calls=1)
     testing_dataset = testing_dataset.prefetch(buffer_size=1)
     print("loaded",total_testing_batches,"testing batches")

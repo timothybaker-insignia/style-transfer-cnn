@@ -1,3 +1,5 @@
+import tensorflow as tf
+
 from Layer import Layer
          
 class CNN:
@@ -13,11 +15,11 @@ class CNN:
         else:
             print('Error: Cannot add layer after graph is finalized!')
         
-    def addLayer(self, layertype, dimensions, inputchannels, outputchannels, activation='none', keepprob=1.0):
+    def addLayer(self, layertype, dimensions, inputchannels=0, outputchannels=0, activation='none', keepprob=1.0):
         if not self.finalized:
             layer = Layer(layertype, dimensions, inputchannels, outputchannels, activation, keepprob)
             self.layers.append(layer)
-        else
+        else:
             print('Error: Cannot add layer after graph is finalized!')
         
     def clearLayers(self):
@@ -25,8 +27,8 @@ class CNN:
 
     def computationalGraph(self, batch):
         self.finalized = True
-        for layer in layers:
-            with tf.name_scope(layer.layertype + " " + layer.id)
+        for layer in self.layers:
+            with tf.name_scope(layer.layertype + "-" + str(layer.id)):
                 batch = layer.compute(batch)
         return batch
 
