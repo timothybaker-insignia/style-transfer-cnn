@@ -32,7 +32,7 @@ TEST_ONLY             =    False    # skips training
 # Tunable Parameters
 BATCH_SIZE            =    32      # training batch size, ONLY 1 IS IMPLEMENTED
 EPOCHS                =    10       # number of epochs to train for
-LEARNING_RATE         =    1e-2     # learning rate for gradient descent
+LEARNING_RATE         =    1e-3     # learning rate for gradient descent
 KEEP_PROB             =    0.5      # keep probability for dropout layers
 LAMBDA_REG            =    0.1    # lambda for kernel regularization
 
@@ -81,9 +81,9 @@ def cifar10Model(keepprob=1.0):
     cifar10cnn.addLayer('maxpooling', 2)
     cifar10cnn.addLayer('dropout', 2)
     # fully connected layer 1
-    cifar10cnn.addLayer('connected', 2, 512, 512, activation='none', keepprob=keepprob)
+    cifar10cnn.addLayer('connected', 2, 512, 1024, activation='none', keepprob=keepprob)
     # fully connected layer 2
-    cifar10cnn.addLayer('connected', 2, 512, NUM_CLASSES, activation='none', keepprob=1.0)
+    cifar10cnn.addLayer('connected', 2, 1024, NUM_CLASSES, activation='none', keepprob=1.0)
     return cifar10cnn
 
 def alphaLabelToNumLabel(key):
@@ -113,18 +113,25 @@ def numLabelToAlphaLabel(key):
     return label_dict[key]
 
 def loadTrainingAndValidationBatches():
+    image_and_label = []    
+    for i in range(10):
+        filepath = "data/train/"+numLabelToAlphaLabel(i)
+        for filename in os.listdir(filepath):
+            image_and_label.append((filename, i))
+
+    Random(0).shuffle(image_and_label)
     batches = []
     mini_batch_frame = []
     mini_batch_label = []
     j = 0
-    for i in range(10):
-        filepath = "data/train/"+numLabelToAlphaLabel(i)
-        for filename in os.listdir(filepath):
+    for i in range(len(image_and_label)):
+            filename, index = image_and_label[i]
+            filepath = "data/train/"+numLabelToAlphaLabel(index)
             if j < BATCH_SIZE:  
               im_frame = Image.open(filepath + "/" + filename)
               np_frame = np.array(im_frame)
               label = np.array(np.zeros(10))
-              label[i] = 1
+              label[index] = 1
               mini_batch_label.append(label)
               mini_batch_frame.append(np_frame) 
               j = j + 1
@@ -134,10 +141,10 @@ def loadTrainingAndValidationBatches():
               mini_batch_frame = []
               mini_batch_label = []
               j = 0
-              im_frame = Image.open("data/train/"+numLabelToAlphaLabel(i) + "/" + filename)
+              im_frame = Image.open(filepath + "/" + filename)
               np_frame = np.array(im_frame)
               label = np.array(np.zeros(10))
-              label[i] = 1
+              label[index] = 1
     Random(0).shuffle(batches)
     training, validation = train_test_split(batches)
     validation = [(i,j,False) for (i,j,k) in validation]
@@ -223,7 +230,7 @@ def main():
 
     training_dataset, training_iterations, validation_dataset, validation_iterations, testing_dataset, testing_iterations = loadDatasets()
 
-    with tf.name_scope("computational_graph"):
+    with tf.device('GPU:0'),tf.name_scope("computational_graph"):
         iterator = tf.data.Iterator.from_structure(training_dataset.output_types, training_dataset.output_shapes)
         training_init_op = iterator.make_initializer(training_dataset)
         validation_init_op = iterator.make_initializer(validation_dataset)
