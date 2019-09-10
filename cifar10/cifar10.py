@@ -34,7 +34,7 @@ BATCH_SIZE            =    32      # training batch size, ONLY 1 IS IMPLEMENTED
 EPOCHS                =    100       # number of epochs to train for
 LEARNING_RATE         =    1e-2     # learning rate for gradient descent
 KEEP_PROB             =    0.5      # keep probability for dropout layers
-LAMBDA_REG            =    0.1      # lambda for kernel regularization
+LAMBDA_REG            =    0.2      # lambda for kernel regularization
 
 # I/O folders and files
 DATA_PATH = "data/"
