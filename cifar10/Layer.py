@@ -62,7 +62,7 @@ class Layer:
         return tf.nn.conv3d(batch, kernel, strides=self.stride, padding=self.padding) 
 
     def dropout(self, batch):
-        return tf.nn.dropout(batch, self.keepprob)
+        return tf.nn.dropout(batch, keep_prob=self.keepprob)
 
     def incep1d(self, batch):
         # branch 1

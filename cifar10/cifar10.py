@@ -33,8 +33,8 @@ TEST_ONLY             =    False    # skips training
 BATCH_SIZE            =    128      # training batch size, ONLY 1 IS IMPLEMENTED
 EPOCHS                =    10       # number of epochs to train for
 LEARNING_RATE         =    1e-3     # learning rate for gradient descent
-KEEP_PROB             =    0.5      # keep probability for dropout layers
-LAMBDA_REG            =    0.1      # lambda for kernel regularization
+KEEP_PROB             =    0.1      # keep probability for dropout layers
+LAMBDA_REG            =    1.0      # lambda for kernel regularization
 
 # I/O folders and files
 DATA_PATH = "data/"
