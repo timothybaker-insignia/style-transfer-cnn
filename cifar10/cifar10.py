@@ -28,6 +28,7 @@ NUM_CLASSES           =    10       # number of output classes
 RESTORE_MODEL         =    False    # restore previous model
 SAVE_MODEL            =    False    # save model 
 TEST_ONLY             =    False    # skips training
+SAVEDMODEL            =    False    # saves SavedModel object for deploy
 
 # Tunable Parameters
 BATCH_SIZE            =    1024      # training batch size, ONLY 1 IS IMPLEMENTED
@@ -40,6 +41,7 @@ LAMBDA_REG            =    0.1      # lambda for kernel regularization
 DATA_PATH = "data/"
 CHECKPOINT_PATH = "checkpoint/" 
 OUTPUT_PATH = "output/"
+SAVEDMODEL_PATH = "savedModel/"
 
 if TEST_ONLY:
     EPOCHS = 0
@@ -57,6 +59,9 @@ def setupEnv():
     if SAVE_MODEL:
       if not os.path.exists(CHECKPOINT_PATH):
         os.makedirs(CHECKPOINT_PATH)
+    if SAVEDMODEL:
+        if not os.path.exists(SAVEDMODEL_PATH):
+            os.makedirs(SAVEDMODEL_PATH)
         
 def alphaLabelToNumLabel(key):
     label_dict = {"airplane" : 0,
@@ -229,7 +234,11 @@ def main():
     if RESTORE_MODEL or SAVE_MODEL:
         saver = tf.train.Saver()
     
-    with tf.Session(config=config) as sess:
+    builder = None
+    if SAVEDMODEL:
+        builder = tf.saved_model.builder.SavedModelBuilder(export_dir)
+    
+    with tf.Session(config=config, graph=tf.Graph()) as sess:
         print("training session starting...")
         sys.stdout.flush()
         
@@ -237,6 +246,12 @@ def main():
                
         if RESTORE_MODEL:
             saver.restore(sess, CHECKPOINT_PATH + "model.ckpt")
+            
+        if SAVEDMODEL:
+            builder.add_meta_graph_and_variables(sess,
+                                       [tf.saved_model.tag_constants.TRAINING],
+                                       signature_def_map=foo_signatures,
+                                       assets_collection=foo_assets)            
 
         tf.get_default_graph().finalize()
 

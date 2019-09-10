@@ -35,6 +35,16 @@ class CNN:
             with tf.name_scope(layer.layertype + "-" + str(layer.id)):
                 batch = layer.compute(batch)
         return batch
+        
+    def computationalGraphEveryLayerOutput(self, batch):
+        self.finalized = True
+        layer_outputs = []
+        for layer in self.layers:
+            layer_name = layer.layertype + "-" + str(layer.id)
+            with tf.name_scope(layer_name):
+                batch = layer.compute(batch)
+                layer_outputs.append((layer_name, batch))
+        return layer_outputs
  
 def cifar10Model(num_classes, keepprob=1.0):
     # create network model for training cifar 10
@@ -70,4 +80,5 @@ def cifar10Model(num_classes, keepprob=1.0):
     # fully connected layer 2
     cifar10cnn.addLayer('connected', 1, 1024, num_classes, activation='none')
     return cifar10cnn
+        
         
