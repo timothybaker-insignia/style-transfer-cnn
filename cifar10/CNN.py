@@ -36,4 +36,38 @@ class CNN:
                 batch = layer.compute(batch)
         return batch
  
+def cifar10Model(num_classes, keepprob=1.0):
+    # create network model for training cifar 10
+    cifar10cnn = CNN()
+    # convolution layer 1
+    cifar10cnn.addLayer('convolution', 2, 3, 32, activation='relu', keepprob=keepprob)
+    cifar10cnn.addLayer('convolution', 2, 32, 32, activation='relu', keepprob=keepprob)
+    cifar10cnn.addLayer('maxpooling', 2)
+    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
+    # convolution layer 2
+    cifar10cnn.addLayer('convolution', 2, 32, 64, activation='relu', keepprob=keepprob)
+    cifar10cnn.addLayer('convolution', 2, 64, 64, activation='relu', keepprob=keepprob)
+    cifar10cnn.addLayer('maxpooling', 2)
+    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
+    # convolution layer 3
+    cifar10cnn.addLayer('convolution', 2, 64, 128, activation='relu', keepprob=keepprob)
+    cifar10cnn.addLayer('convolution', 2, 128, 128, activation='relu', keepprob=keepprob)
+    cifar10cnn.addLayer('maxpooling', 2)
+    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
+    # convolution layer 4
+    cifar10cnn.addLayer('convolution', 2, 128, 256, activation='relu', keepprob=keepprob)
+    cifar10cnn.addLayer('convolution', 2, 256, 256, activation='relu', keepprob=keepprob)
+    cifar10cnn.addLayer('maxpooling', 2)
+    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
+    # convolution layer 5
+    cifar10cnn.addLayer('convolution', 2, 256, 512, activation='relu', keepprob=keepprob)
+    cifar10cnn.addLayer('convolution', 2, 512, 512, activation='relu', keepprob=keepprob)
+    cifar10cnn.addLayer('maxpooling', 2)
+    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
+    # fully connected layer 1
+    cifar10cnn.addLayer('connected', 1, 512, 1024, activation='none')
+    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
+    # fully connected layer 2
+    cifar10cnn.addLayer('connected', 1, 1024, num_classes, activation='none')
+    return cifar10cnn
         

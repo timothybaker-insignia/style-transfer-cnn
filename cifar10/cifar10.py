@@ -17,7 +17,7 @@ from PIL import Image
 from random import Random
 from sklearn.model_selection import train_test_split
 
-from CNN import CNN
+from CNN import cifar10Model
 
 THREADS = cpu_count()-1
 
@@ -47,46 +47,17 @@ if TEST_ONLY:
 def checkEnv():
     if not os.path.exists(DATA_PATH):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), DATA_PATH)
+    if RESTORE_MODEL:
+        if not os.path.exists(CHECKPOINT_PATH):
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), CHECKPOINT_PATH)
 
 def setupEnv():
     if not os.path.exists(OUTPUT_PATH):
         os.makedirs(OUTPUT_PATH)
-
-def cifar10Model(keepprob=1.0):
-    # create network model for training cifar 10
-    cifar10cnn = CNN()
-    # convolution layer 1
-    cifar10cnn.addLayer('convolution', 2, 3, 32, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('convolution', 2, 32, 32, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 2
-    cifar10cnn.addLayer('convolution', 2, 32, 64, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('convolution', 2, 64, 64, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 3
-    cifar10cnn.addLayer('convolution', 2, 64, 128, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('convolution', 2, 128, 128, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 4
-    cifar10cnn.addLayer('convolution', 2, 128, 256, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('convolution', 2, 256, 256, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 5
-    cifar10cnn.addLayer('convolution', 2, 256, 512, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('convolution', 2, 512, 512, activation='relu', keepprob=keepprob)
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # fully connected layer 1
-    cifar10cnn.addLayer('connected', 2, 512, 1024, activation='none', keepprob=keepprob)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # fully connected layer 2
-    cifar10cnn.addLayer('connected', 2, 1024, NUM_CLASSES, activation='none', keepprob=1.0)
-    return cifar10cnn
-
+    if SAVE_MODEL:
+      if not os.path.exists(CHECKPOINT_PATH):
+        os.makedirs(CHECKPOINT_PATH)
+        
 def alphaLabelToNumLabel(key):
     label_dict = {"airplane" : 0,
                   "automobile" : 1,
@@ -226,8 +197,7 @@ def main():
     checkEnv();
     setupEnv();
 
-    config = tf.ConfigProto(allow_soft_placement=True, 
-        log_device_placement=False)
+    config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 
     training_dataset, training_iterations, validation_dataset, validation_iterations, testing_dataset, testing_iterations = loadDatasets()
 
@@ -241,7 +211,7 @@ def main():
         opt = tf.train.AdamOptimizer(learning_rate=learning_rate)
         batch, label, is_training = iterator.get_next()
         keep_prob = tf.cond(is_training, lambda: KEEP_PROB, lambda: 1.0)
-        model = cifar10Model(keep_prob)
+        model = cifar10Model(NUM_CLASSES, keep_prob)
         model_output = model.computationalGraph(batch)
         model_output_reshaped = tf.reshape(model_output,[-1, NUM_CLASSES])
         model_output_argmax = tf.argmax(model_output_reshaped, 1)
@@ -254,12 +224,20 @@ def main():
         reg = tf.reduce_sum(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
         loss = cross_entropy + LAMBDA_REG*reg
         train_step = opt.minimize(loss, global_step=global_step)
-
+        
+    saver = None
+    if RESTORE_MODEL or SAVE_MODEL:
+        saver = tf.train.Saver()
+    
     with tf.Session(config=config) as sess:
         print("training session starting...")
         sys.stdout.flush()
         
         sess.run(tf.global_variables_initializer())
+               
+        if RESTORE_MODEL:
+            saver.restore(sess, CHECKPOINT_PATH + "model.ckpt")
+
         tf.get_default_graph().finalize()
 
         for epoch in range(EPOCHS):
@@ -355,7 +333,10 @@ def main():
         epoch_test_loss = str(round(epoch_test_loss / testing_iterations,4))
         epoch_test_acc = str(round(epoch_test_acc / testing_iterations,4))
         print("testing loss:",epoch_test_loss, "testing acc:", epoch_test_acc)
-        sys.stdout.flush()  
+        sys.stdout.flush() 
+        
+        if SAVE_MODEL:
+            saver.save(sess, CHECKPOINT_PATH + "model.ckpt") 
 
     end_time = (time.time() - start_time) / 60
     print("finished training in: ", round(end_time, 2))
