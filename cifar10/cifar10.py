@@ -230,7 +230,7 @@ def main():
 
     training_dataset, training_iterations, validation_dataset, validation_iterations, testing_dataset, testing_iterations = loadDatasets()
 
-    with tf.device('GPU:0'),tf.name_scope("computational_graph"):
+    with tf.name_scope("computational_graph"):
         iterator = tf.data.Iterator.from_structure(training_dataset.output_types, training_dataset.output_shapes)
         training_init_op = iterator.make_initializer(training_dataset)
         validation_init_op = iterator.make_initializer(validation_dataset)
