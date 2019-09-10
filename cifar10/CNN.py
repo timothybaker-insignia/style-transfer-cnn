@@ -11,11 +11,11 @@ class CNN:
         self.batch_size = batch_size
         self.layer_one = True
 
-    def addLayer(self, layertype):
+    def addLayer(self, layertype, keepprob=1.0):
         if not layertype in ['maxpooling', 'dropout']:
             raise ValueError('layertype must be maxpooling or dropout')
         if not self.finalized:
-            layer = Layer(layertype)
+            layer = Layer(layertype, keepprob)
         else:
             print('Error: Cannot add layer after graph is finalized!')
         
