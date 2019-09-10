@@ -248,7 +248,7 @@ def main():
         label_argmax = tf.argmax(label_reshaped, 1)
         prediction = tf.equal(model_output_argmax, label_argmax)
         accuracy = tf.reduce_mean(tf.cast(prediction, tf.float32))
-        softmax_cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=label_reshaped, logits=model_output)
+        softmax_cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=label_reshaped, logits=model_output_reshaped)
         cross_entropy =  tf.reduce_mean(softmax_cross_entropy)
         reg = tf.cond(is_training, lambda: tf.reduce_sum(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)), lambda: 0.0)
         loss = cross_entropy + LAMBDA_REG*reg
