@@ -30,9 +30,9 @@ SAVE_MODEL            =    False    # save model
 TEST_ONLY             =    False    # skips training
 
 # Tunable Parameters
-BATCH_SIZE            =    256      # training batch size, ONLY 1 IS IMPLEMENTED
-EPOCHS                =    10       # number of epochs to train for
-LEARNING_RATE         =    1e-3     # learning rate for gradient descent
+BATCH_SIZE            =    32      # training batch size, ONLY 1 IS IMPLEMENTED
+EPOCHS                =    100       # number of epochs to train for
+LEARNING_RATE         =    1e-2     # learning rate for gradient descent
 KEEP_PROB             =    0.5      # keep probability for dropout layers
 LAMBDA_REG            =    0.1      # lambda for kernel regularization
 
