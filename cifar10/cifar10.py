@@ -34,7 +34,7 @@ BATCH_SIZE            =    128      # training batch size, ONLY 1 IS IMPLEMENTED
 EPOCHS                =    10       # number of epochs to train for
 LEARNING_RATE         =    1e-3     # learning rate for gradient descent
 KEEP_PROB             =    0.5      # keep probability for dropout layers
-LAMBDA_REG            =    0.1    # lambda for kernel regularization
+LAMBDA_REG            =    0.1      # lambda for kernel regularization
 
 # I/O folders and files
 DATA_PATH = "data/"
@@ -250,7 +250,7 @@ def main():
         accuracy = tf.reduce_mean(tf.cast(prediction, tf.float32))
         softmax_cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=label_reshaped, logits=model_output_reshaped)
         cross_entropy =  tf.reduce_mean(softmax_cross_entropy)
-        reg = tf.cond(is_training, lambda: tf.reduce_sum(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)), lambda: 0.0)
+        reg = tf.reduce_sum(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
         loss = cross_entropy + LAMBDA_REG*reg
         train_step = opt.minimize(loss, global_step=global_step)
 
