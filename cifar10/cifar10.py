@@ -17,7 +17,7 @@ from PIL import Image
 from random import Random
 from sklearn.model_selection import train_test_split
 
-from CNN import cifar10ModelInception as cifar10Model
+from CNN import cifar10Model as cifar10Model
 
 THREADS = cpu_count()-1             # number of system threads minus one
 
@@ -31,7 +31,7 @@ TEST_ONLY             =    False    # skips training
 SAVEDMODEL            =    False    # saves SavedModel object for deploy
 
 # Tunable Parameters
-BATCH_SIZE            =    64      # training batch size
+BATCH_SIZE            =    128      # training batch size
 BUFFER_SIZE           =    1       # number of batches to buffer
 EPOCHS                =    100        # number of epochs to train for
 LEARNING_RATE         =    1e-4     # learning rate for gradient descent

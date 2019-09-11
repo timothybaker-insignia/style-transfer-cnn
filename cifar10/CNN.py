@@ -232,9 +232,9 @@ def cifar10Model(num_classes, keepprob=1.0):
     cifar10cnn.addLayer('maxpooling', 2)
     cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
     # fully connected layer 1
-    cifar10cnn.addLayer('connected', 1, 512, 2048, activation='none')
+    cifar10cnn.addLayer('connected', 1, 512, 1024, activation='none')
     # fully connected layer 2
-    cifar10cnn.addLayer('connected', 1, 2048, num_classes, activation='none')
+    cifar10cnn.addLayer('connected', 1, 1024, num_classes, activation='none')
     return cifar10cnn
         
         
