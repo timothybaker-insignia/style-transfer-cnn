@@ -26,14 +26,14 @@ NUM_CLASSES           =    10       # number of output classes
 
 # Flags
 RESTORE_MODEL         =    False    # restore previous model
-SAVE_MODEL            =    False    # save model 
+SAVE_MODEL            =    True     # save model 
 TEST_ONLY             =    False    # skips training
 SAVEDMODEL            =    False    # saves SavedModel object for deploy
 
 # Tunable Parameters
-BATCH_SIZE            =    1024      # training batch size, ONLY 1 IS IMPLEMENTED
-EPOCHS                =    300       # number of epochs to train for
-LEARNING_RATE         =    1e-3     # learning rate for gradient descent
+BATCH_SIZE            =    1024     # training batch size, ONLY 1 IS IMPLEMENTED
+EPOCHS                =    300      # number of epochs to train for
+LEARNING_RATE         =    1e-2     # learning rate for gradient descent
 KEEP_PROB             =    0.5      # keep probability for dropout layers
 LAMBDA_REG            =    0.1      # lambda for kernel regularization
 
