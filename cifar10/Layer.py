@@ -100,19 +100,19 @@ class Layer:
 
     def incep2d(self, batch):
         # branch 1
-        kernel_1 = tf.Variable(tf.truncated_normal([1, self.inputchannels, self.outputchannels], stddev=0.1))
+        kernel_1 = tf.Variable(tf.truncated_normal([1, 1, self.inputchannels, self.outputchannels], stddev=0.1))
         l2_1 = tf.nn.l2_loss(kernel_1)           
         tf.losses.add_loss(l2_1, 
             loss_collection=tf.GraphKeys.REGULARIZATION_LOSSES)      
         branch_1 = tf.nn.conv2d(batch, kernel_1, strides=1, padding='SAME') 
         # branch 2
-        kernel_2 = tf.Variable(tf.truncated_normal([3, self.inputchannels, self.outputchannels], stddev=0.1))
+        kernel_2 = tf.Variable(tf.truncated_normal([3, 3, self.inputchannels, self.outputchannels], stddev=0.1))
         l2_2 = tf.nn.l2_loss(kernel_2)       
         tf.losses.add_loss(l2_2, 
             loss_collection=tf.GraphKeys.REGULARIZATION_LOSSES)          
-        branch_2 = tf.nn.conv2d(batch, kernel_2, strides=1, padding=self.padding) 
+        branch_2 = tf.nn.conv2d(batch, kernel_2, strides=1, padding='SAME') 
         # branch 3
-        kernel_3 = tf.Variable(tf.truncated_normal([5, self.inputchannels, self.outputchannels], stddev=0.1))
+        kernel_3 = tf.Variable(tf.truncated_normal([5, 5, self.inputchannels, self.outputchannels], stddev=0.1))
         l2_3 = tf.nn.l2_loss(kernel_3)       
         tf.losses.add_loss(l2_3, 
             loss_collection=tf.GraphKeys.REGULARIZATION_LOSSES)          
@@ -120,7 +120,7 @@ class Layer:
         # concat
         concat = tf.concat([branch_1, branch_2, branch_3], -1)
         # reduce feature space
-        kernel_4 = tf.Variable(tf.truncated_normal([1, self.outputchannels*3, self.outputchannels], stddev=0.1))
+        kernel_4 = tf.Variable(tf.truncated_normal([1, 1, self.outputchannels*3, self.outputchannels], stddev=0.1))
         l2_4 = tf.nn.l2_loss(kernel_4)
         tf.losses.add_loss(l2_4, 
             loss_collection=tf.GraphKeys.REGULARIZATION_LOSSES) 

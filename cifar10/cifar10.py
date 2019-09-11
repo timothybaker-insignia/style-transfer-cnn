@@ -17,9 +17,9 @@ from PIL import Image
 from random import Random
 from sklearn.model_selection import train_test_split
 
-from CNN import cifar10Model
+from CNN import cifar10ModelInception as cifar10Model
 
-THREADS = cpu_count()-1
+THREADS = cpu_count()-1             # number of system threads minus one
 
 # Model Specific Parameters
 NUM_CLASSES           =    10       # number of output classes
@@ -31,9 +31,10 @@ TEST_ONLY             =    False    # skips training
 SAVEDMODEL            =    False    # saves SavedModel object for deploy
 
 # Tunable Parameters
-BATCH_SIZE            =    1024     # training batch size, ONLY 1 IS IMPLEMENTED
-EPOCHS                =    300      # number of epochs to train for
-LEARNING_RATE         =    1e-2     # learning rate for gradient descent
+BATCH_SIZE            =    64      # training batch size
+BUFFER_SIZE           =    1       # number of batches to buffer
+EPOCHS                =    100        # number of epochs to train for
+LEARNING_RATE         =    1e-4     # learning rate for gradient descent
 KEEP_PROB             =    0.5      # keep probability for dropout layers
 LAMBDA_REG            =    0.1      # lambda for kernel regularization
 
@@ -122,20 +123,46 @@ def loadTrainingAndValidationBatches():
               np_frame = np.array(im_frame)
               label = np.array(np.zeros(10))
               label[index] = 1
+    batches.pop()
     Random(0).shuffle(batches)
     training, validation = train_test_split(batches)
     validation = [(i,j,False) for (i,j,k) in validation]
     return training, validation
 
 def loadTestingBatches():
-    batches = []
+    image_and_label = []    
     for i in range(10):
-        for filename in os.listdir("data/test/"+numLabelToAlphaLabel(i)):
-            im_frame = Image.open("data/test/"+numLabelToAlphaLabel(i) + "/" + filename)
-            np_frame = np.array([np.array(im_frame)])
-            label = np.array([np.zeros(10)])
-            label[0][i] = 1
-            batches.append((np_frame, label, False)) 
+        filepath = "data/test/"+numLabelToAlphaLabel(i)
+        for filename in os.listdir(filepath):
+            image_and_label.append((filename, i))
+
+    Random(0).shuffle(image_and_label)
+    batches = []
+    mini_batch_frame = []
+    mini_batch_label = []
+    j = 0
+    for i in range(len(image_and_label)):
+            filename, index = image_and_label[i]
+            filepath = "data/test/"+numLabelToAlphaLabel(index)
+            if j < BATCH_SIZE:  
+              im_frame = Image.open(filepath + "/" + filename)
+              np_frame = np.array(im_frame)
+              label = np.array(np.zeros(10))
+              label[index] = 1
+              mini_batch_label.append(label)
+              mini_batch_frame.append(np_frame) 
+              j = j + 1
+            else:
+              mini_batch = (mini_batch_frame, mini_batch_label, False)
+              batches.append(mini_batch)
+              mini_batch_frame = []
+              mini_batch_label = []
+              j = 0
+              im_frame = Image.open(filepath + "/" + filename)
+              np_frame = np.array(im_frame)
+              label = np.array(np.zeros(10))
+              label[index] = 1
+    batches.pop()
     Random(0).shuffle(batches)
     return batches
 
@@ -147,18 +174,14 @@ def loadDatasets():
     Random(0).shuffle(training_batches)                                    
     training_iterations = int(len(training_batches))
 
-    def gen_training():
-        for i in range(training_iterations):
+    def genBatches():
+        for i in range(len(training_batches)):
             batch, label, is_training = training_batches[i]
             yield (batch, label, is_training)
 
-    def self_map(batch, label, is_training):
-        return batch, label, is_training
-
-    training_dataset = tf.data.Dataset.from_generator(gen_training, (tf.float32,tf.float32,tf.bool))
-    training_dataset = training_dataset.shuffle(buffer_size=10)
-    training_dataset = training_dataset.map(self_map, num_parallel_calls=1)
-    training_dataset = training_dataset.prefetch(buffer_size=1)
+    training_dataset = tf.data.Dataset.from_generator(genBatches, (tf.float32,tf.float32,tf.bool))
+    training_dataset = training_dataset.shuffle(buffer_size=BUFFER_SIZE)
+    training_dataset = training_dataset.prefetch(buffer_size=BUFFER_SIZE)
     print("loaded",total_training_batches,"training batches")
     sys.stdout.flush()
 
@@ -170,8 +193,7 @@ def loadDatasets():
             batch, label, is_training = validation_batches[i]
             yield (batch, label, is_training)
     validation_dataset = tf.data.Dataset.from_generator(gen_validation, (tf.float32,tf.float32,tf.bool))
-    validation_dataset = validation_dataset.map(self_map, num_parallel_calls=1)
-    validation_dataset = validation_dataset.prefetch(buffer_size=1)
+    validation_dataset = validation_dataset.prefetch(buffer_size=BUFFER_SIZE)
     print("loaded",total_validation_batches,"validation batches")
     sys.stdout.flush()
 
@@ -186,8 +208,7 @@ def loadDatasets():
             batch, label, is_training = testing_batches[i]
             yield (batch, label, is_training)
     testing_dataset = tf.data.Dataset.from_generator(gen_testing, (tf.float32,tf.float32,tf.bool))
-    testing_dataset = testing_dataset.map(self_map, num_parallel_calls=1)
-    testing_dataset = testing_dataset.prefetch(buffer_size=1)
+    testing_dataset = testing_dataset.prefetch(buffer_size=BUFFER_SIZE)
     print("loaded",total_testing_batches,"testing batches")
     print("building computational graph...")
     sys.stdout.flush()
@@ -199,61 +220,55 @@ def main():
     print("started at", time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(start_time)))
     sys.stdout.flush()
 
-    checkEnv();
     setupEnv();
+    checkEnv();
 
     config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 
     training_dataset, training_iterations, validation_dataset, validation_iterations, testing_dataset, testing_iterations = loadDatasets()
 
-    with tf.name_scope("computational_graph"):
-        iterator = tf.data.Iterator.from_structure(training_dataset.output_types, training_dataset.output_shapes)
-        training_init_op = iterator.make_initializer(training_dataset)
-        validation_init_op = iterator.make_initializer(validation_dataset)
-        testing_init_op = iterator.make_initializer(testing_dataset)
-        global_step = tf.train.create_global_step()
-        learning_rate = LEARNING_RATE
-        opt = tf.train.AdamOptimizer(learning_rate=learning_rate)
-        batch, label, is_training = iterator.get_next()
-        keep_prob = tf.cond(is_training, lambda: KEEP_PROB, lambda: 1.0)
-        model = cifar10Model(NUM_CLASSES, keep_prob)
-        model_output = model.computationalGraph(batch)
-        model_output_reshaped = tf.reshape(model_output,[-1, NUM_CLASSES])
-        model_output_argmax = tf.argmax(model_output_reshaped, 1)
-        label_reshaped = tf.reshape(label,[-1, NUM_CLASSES])
-        label_argmax = tf.argmax(label_reshaped, 1)
-        prediction = tf.equal(model_output_argmax, label_argmax)
-        accuracy = tf.reduce_mean(tf.cast(prediction, tf.float32))
-        softmax_cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=label_reshaped, logits=model_output_reshaped)
-        cross_entropy =  tf.reduce_mean(softmax_cross_entropy)
-        reg = tf.reduce_sum(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
-        loss = cross_entropy + LAMBDA_REG*reg
-        train_step = opt.minimize(loss, global_step=global_step)
-        
-    saver = None
-    if RESTORE_MODEL or SAVE_MODEL:
-        saver = tf.train.Saver()
+    if True:
+        with tf.name_scope("computational_graph"):
+            iterator = tf.data.Iterator.from_structure(training_dataset.output_types, training_dataset.output_shapes)
+            training_init_op = iterator.make_initializer(training_dataset)
+            validation_init_op = iterator.make_initializer(validation_dataset)
+            testing_init_op = iterator.make_initializer(testing_dataset)
+            global_step = tf.train.create_global_step()
+            learning_rate = LEARNING_RATE
+            opt = tf.train.AdamOptimizer(learning_rate=learning_rate)
+            batch, label, is_training = iterator.get_next()
+            keep_prob = tf.cond(is_training, lambda: KEEP_PROB, lambda: 1.0)
+            model = cifar10Model(NUM_CLASSES, keep_prob)
+            model_output = model.computationalGraph(batch)
+            model_output_reshaped = tf.reshape(model_output,[-1, NUM_CLASSES])
+            model_output_argmax = tf.argmax(model_output_reshaped, 1)
+            label_reshaped = tf.reshape(label,[-1, NUM_CLASSES])
+            label_argmax = tf.argmax(label_reshaped, 1)
+            prediction = tf.equal(model_output_argmax, label_argmax)
+            accuracy = tf.reduce_mean(tf.cast(prediction, tf.float32))
+            softmax_cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=label_reshaped, logits=model_output_reshaped)
+            cross_entropy =  tf.reduce_mean(softmax_cross_entropy)
+            reg = tf.reduce_sum(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
+            loss = cross_entropy + LAMBDA_REG*reg
+            train_step = opt.minimize(loss, global_step=global_step)
+
+    saver = tf.train.Saver()
     
-    builder = None
-    if SAVEDMODEL:
-        builder = tf.saved_model.builder.SavedModelBuilder(export_dir)
-    
-    with tf.Session(config=config, graph=tf.Graph()) as sess:
-        print("training session starting...")
+    with tf.Session(config=config) as sess:
+        print("initializing graph...")
         sys.stdout.flush()
         
-        sess.run(tf.global_variables_initializer())
-               
         if RESTORE_MODEL:
-            saver.restore(sess, CHECKPOINT_PATH + "model.ckpt")
-            
-        if SAVEDMODEL:
-            builder.add_meta_graph_and_variables(sess,
-                                       [tf.saved_model.tag_constants.TRAINING],
-                                       signature_def_map=foo_signatures,
-                                       assets_collection=foo_assets)            
+            try:
+                saver.restore(sess, CHECKPOINT_PATH + "model.ckpt")
+            except ValueError as err:
+                pass
+        
+        sess.run(tf.global_variables_initializer())
+        tf.get_default_graph().finalize()      
 
-        tf.get_default_graph().finalize()
+        print("training session starting...")
+        sys.stdout.flush()
 
         for epoch in range(EPOCHS):
             epoch_start_time = time.time()
@@ -264,7 +279,7 @@ def main():
             epoch_validation_acc = 0.0
             
             sess.run(training_init_op)
-            for iteration in range(training_iterations):
+            while True:
                 try:
                     t_stime = time.time()
                     _, loss_, acc = sess.run([train_step, loss, accuracy])
@@ -275,8 +290,7 @@ def main():
                     print(err)
                     sys.stdout.flush()
                 except tf.errors.OutOfRangeError as err:
-                    print(err)
-                    sys.stdout.flush()
+                    break
                 except tf.errors.InternalError as err:
                     print(err)
                     sys.stdout.flush()
@@ -287,15 +301,14 @@ def main():
                     pass
 
             sess.run(validation_init_op)
-            for iteration in range(validation_iterations):   
+            while True:   
                 try:   
                     loss_, acc = sess.run([loss, accuracy])
                 except tf.errors.ResourceExhaustedError as err:
                     print(err)
                     sys.stdout.flush()
                 except tf.errors.OutOfRangeError as err:
-                    print(err)
-                    sys.stdout.flush()
+                    break
                 except tf.errors.InternalError as err:
                     print(err)
                     sys.stdout.flush()
@@ -327,15 +340,14 @@ def main():
         epoch_test_loss = 0.0
         epoch_test_acc = 0.0
         sess.run(testing_init_op)
-        for iteration in range(testing_iterations):   
+        while True:
             try:   
                 lab, pred, loss_, acc = sess.run([label, prediction, loss, accuracy])
             except tf.errors.ResourceExhaustedError as err:
                 print(err)
                 sys.stdout.flush()
             except tf.errors.OutOfRangeError as err:
-                print(error)
-                sys.stdout.flush()
+                break
             except tf.errors.InternalError as err:
                 print(err)
                 sys.stdout.flush()
@@ -344,14 +356,14 @@ def main():
                 epoch_test_acc += acc
             finally:
                 pass
+
+        if SAVE_MODEL:
+            saver.save(sess, CHECKPOINT_PATH + "model.ckpt") 
                 
         epoch_test_loss = str(round(epoch_test_loss / testing_iterations,4))
         epoch_test_acc = str(round(epoch_test_acc / testing_iterations,4))
         print("testing loss:",epoch_test_loss, "testing acc:", epoch_test_acc)
         sys.stdout.flush() 
-        
-        if SAVE_MODEL:
-            saver.save(sess, CHECKPOINT_PATH + "model.ckpt") 
 
     end_time = (time.time() - start_time) / 60
     print("finished training in: ", round(end_time, 2))
