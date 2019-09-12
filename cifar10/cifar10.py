@@ -25,18 +25,18 @@ THREADS = cpu_count()-1             # number of system threads minus one
 NUM_CLASSES           =    10       # number of output classes
 
 # Flags
-RESTORE_MODEL         =    False    # restore previous model
+RESTORE_MODEL         =    True    # restore previous model
 SAVE_MODEL            =    True     # save model 
 TEST_ONLY             =    False    # skips training
 SAVEDMODEL            =    False    # saves SavedModel object for deploy
 
 # Tunable Parameters
-BATCH_SIZE            =    128      # training batch size
+BATCH_SIZE            =    256      # training batch size
 BUFFER_SIZE           =    1       # number of batches to buffer
-EPOCHS                =    100        # number of epochs to train for
+EPOCHS                =    20        # number of epochs to train for
 LEARNING_RATE         =    1e-4     # learning rate for gradient descent
 KEEP_PROB             =    0.5      # keep probability for dropout layers
-LAMBDA_REG            =    0.1      # lambda for kernel regularization
+LAMBDA_REG            =    0.01      # lambda for kernel regularization
 
 # I/O folders and files
 DATA_PATH = "data/"
