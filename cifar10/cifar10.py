@@ -29,7 +29,7 @@ BUFFER_SIZE           =    2        # number of batches to buffer
 SHUFFLE_SIZE          =    10       # number of batches to shuffle (check dataset API for more info)
 EPOCHS                =    100       # number of epochs to train for
 KEEP_PROB             =    0.5      # keep probability for dropout layers
-LAMBDA_REG            =    1e-3     # lambda for kernel regularization
+LAMBDA_REG            =    1e-4     # lambda for kernel regularization
 LEARNING_RATE         =    1e-3     # learning rate for gradient descent
 
 def main():

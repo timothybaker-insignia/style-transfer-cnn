@@ -115,8 +115,10 @@ def mariana(num_classes, input_channels, keepprob=1.0):
     cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
     # fully connected layer 1
     cifar10cnn.addLayer('connected', 1, 1024, 2048, activation='none')
+    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
     # fully connected layer 2
     cifar10cnn.addLayer('connected', 1, 2048, 4096, activation='none')
+    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
     # fully connected layer 3
     cifar10cnn.addLayer('connected', 1, 4096, num_classes, activation='none')
     return cifar10cnn
