@@ -6,7 +6,7 @@ from itertools import count
 class Layer:
     _ids = count(0)
 
-    def __init__(self, layertype, dimensions=1, inputchannels=1, outputchannels=1, activation='none', keepprob=1.0, layer_one=False, batch_size=1):
+    def __init__(self, layertype, dimensions=1, inputchannels=1, outputchannels=1, activation='none', keepprob=1.0):
         self.id = next(self._ids)
         self.layertype = layertype
         self.dimensions = dimensions
@@ -20,8 +20,6 @@ class Layer:
         self.layertypes = ['convolution', 'inception', 'connected', 'dropout', 'maxpooling']
         self.paddingtypes = ['SAME', 'VALID']
         self.activations = ['relu', 'leaky relu', 'softmax', 'none']
-        self.layer_one = layer_one
-        self.batch_size = batch_size #only used if layer_one is True
         
     def activate(self, batch):
         if self.activation == 'relu':
@@ -37,12 +35,12 @@ class Layer:
         return batch
 
     def batchNorm(self, batch):
-        mean, variance = tf.nn.moments(batch,[0], keep_dims=False)
+        mean, variance = tf.nn.moments(batch,[0], keep_dims=True)
         scale = tf.Variable(tf.ones([self.outputchannels]))
         beta = tf.Variable(tf.zeros([self.outputchannels]))
         epsilon = 1e-3
         return tf.nn.batch_normalization(batch,mean,variance,beta,scale,epsilon)
-
+            
     def conv1d(self, batch):
         kernel = tf.Variable(tf.truncated_normal(
             [self.kernelsize, self.inputchannels, self.outputchannels], stddev=0.1))
