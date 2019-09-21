@@ -18,16 +18,16 @@ NUM_CLASSES           =    10       # number of output classes
 INPUT_CHANNELS        =    3        # number of input channels
 
 # Tunable Parameters
-BATCH_SIZE            =    512      # training batch size
-ROTATE_BATCHES        =    True     # augment training data by adding rotated samples
+BATCH_SIZE            =    256      # training batch size
+ROTATE_BATCHES        =    False     # augment training data by adding rotated samples
 ROTATIONS             =    8        # number of times to rotate data if ROTATE_BATCHES
-ZOOM_BATCHES          =    True     # augment training data by adding zoomed in samples
+ZOOM_BATCHES          =    False     # augment training data by adding zoomed in samples
 ZOOMS                 =    8        # number of times to zoom data if ZOOM_BATCHES
 GAUSSIAN_BATCHES      =    False    # augment training data by adding samples with added gaussian noise
 GAUSSIANS             =    8        # number of times to apply random gaussian filters if GAUSSSIAN_BATCHES
-BUFFER_SIZE           =    2        # number of batches to buffer
-SHUFFLE_SIZE          =    10       # number of batches to shuffle (check dataset API for more info)
-EPOCHS                =    100       # number of epochs to train for
+BUFFER_SIZE           =    1        # number of batches to buffer
+SHUFFLE_SIZE          =    5        # number of batches to shuffle (check dataset API for more info)
+EPOCHS                =    100      # number of epochs to train for
 KEEP_PROB             =    0.5      # keep probability for dropout layers
 LAMBDA_REG            =    1e-4     # lambda for kernel regularization
 LEARNING_RATE         =    1e-3     # learning rate for gradient descent

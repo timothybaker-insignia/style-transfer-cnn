@@ -1,0 +1,162 @@
+
+
+started at 2019-09-16 11:56:25
+loading training and validation batches
+loaded 1494 training batches
+loaded 9 validation batches
+loading testing batches...
+loaded 19 testing batches
+building computational graph...
+initializing graph...
+training session starting...
+epoch 0 run-time: 8.19
+epoch 0 validation loss: 1.2353 validation acc: 0.702
+epoch 0 training loss: 2.8977 training acc: 0.4784
+epoch 1 run-time: 7.92
+epoch 1 validation loss: 0.9841 validation acc: 0.7485
+epoch 1 training loss: 1.3268 training acc: 0.6416
+epoch 2 run-time: 7.86
+epoch 2 validation loss: 0.8858 validation acc: 0.7754
+epoch 2 training loss: 1.1518 training acc: 0.6855
+epoch 3 run-time: 7.85
+epoch 3 validation loss: 0.8724 validation acc: 0.7815
+epoch 3 training loss: 1.0664 training acc: 0.712
+epoch 4 run-time: 7.85
+epoch 4 validation loss: 0.8373 validation acc: 0.7899
+epoch 4 training loss: 1.0119 training acc: 0.7287
+epoch 5 run-time: 7.84
+epoch 5 validation loss: 0.8171 validation acc: 0.7999
+epoch 5 training loss: 0.9675 training acc: 0.7428
+epoch 6 run-time: 7.83
+epoch 6 validation loss: 0.8364 validation acc: 0.793
+epoch 6 training loss: 0.9339 training acc: 0.7535
+epoch 7 run-time: 7.83
+epoch 7 validation loss: 0.8371 validation acc: 0.7891
+epoch 7 training loss: 0.9097 training acc: 0.7614
+epoch 8 run-time: 7.84
+epoch 8 validation loss: 0.7954 validation acc: 0.8079
+epoch 8 training loss: 0.8891 training acc: 0.7683
+epoch 9 run-time: 7.83
+epoch 9 validation loss: 0.8047 validation acc: 0.7993
+epoch 9 training loss: 0.8745 training acc: 0.7736
+epoch 10 run-time: 7.83
+epoch 10 validation loss: 0.8212 validation acc: 0.7936
+epoch 10 training loss: 0.8595 training acc: 0.7783
+epoch 11 run-time: 7.83
+epoch 11 validation loss: 0.7912 validation acc: 0.8084
+epoch 11 training loss: 0.8488 training acc: 0.7825
+epoch 12 run-time: 7.82
+epoch 12 validation loss: 0.7884 validation acc: 0.8092
+epoch 12 training loss: 0.8374 training acc: 0.7868
+epoch 13 run-time: 7.83
+epoch 13 validation loss: 0.797 validation acc: 0.8058
+epoch 13 training loss: 0.8294 training acc: 0.7895
+epoch 14 run-time: 7.81
+epoch 14 validation loss: 0.8002 validation acc: 0.8038
+epoch 14 training loss: 0.8218 training acc: 0.7924
+epoch 15 run-time: 7.78
+epoch 15 validation loss: 0.8151 validation acc: 0.8071
+epoch 15 training loss: 0.8168 training acc: 0.7947
+epoch 16 run-time: 7.79
+epoch 16 validation loss: 0.8061 validation acc: 0.8025
+epoch 16 training loss: 0.8102 training acc: 0.7964
+epoch 17 run-time: 7.8
+epoch 17 validation loss: 0.8185 validation acc: 0.8014
+epoch 17 training loss: 0.8045 training acc: 0.7991
+epoch 18 run-time: 7.78
+epoch 18 validation loss: 0.8212 validation acc: 0.7999
+epoch 18 training loss: 0.8003 training acc: 0.801
+epoch 19 run-time: 7.79
+epoch 19 validation loss: 0.8255 validation acc: 0.8008
+epoch 19 training loss: 0.7946 training acc: 0.8027
+epoch 20 run-time: 7.8
+epoch 20 validation loss: 0.8125 validation acc: 0.8112
+epoch 20 training loss: 0.791 training acc: 0.8039
+epoch 21 run-time: 7.79
+epoch 21 validation loss: 0.8114 validation acc: 0.8071
+epoch 21 training loss: 0.7852 training acc: 0.8059
+epoch 22 run-time: 7.79
+epoch 22 validation loss: 0.8216 validation acc: 0.7984
+epoch 22 training loss: 0.784 training acc: 0.8065
+epoch 23 run-time: 7.8
+epoch 23 validation loss: 0.7993 validation acc: 0.8056
+epoch 23 training loss: 0.7794 training acc: 0.8086
+epoch 24 run-time: 7.81
+epoch 24 validation loss: 0.8057 validation acc: 0.8127
+epoch 24 training loss: 0.777 training acc: 0.8088
+epoch 25 run-time: 7.81
+epoch 25 validation loss: 0.8195 validation acc: 0.8079
+epoch 25 training loss: 0.7723 training acc: 0.8108
+epoch 26 run-time: 7.8
+epoch 26 validation loss: 0.8182 validation acc: 0.8086
+epoch 26 training loss: 0.7709 training acc: 0.8107
+epoch 27 run-time: 7.82
+epoch 27 validation loss: 0.829 validation acc: 0.8099
+epoch 27 training loss: 0.7677 training acc: 0.8124
+epoch 28 run-time: 7.82
+epoch 28 validation loss: 0.8115 validation acc: 0.8088
+epoch 28 training loss: 0.7645 training acc: 0.8136
+epoch 29 run-time: 7.81
+epoch 29 validation loss: 0.7965 validation acc: 0.814
+epoch 29 training loss: 0.7623 training acc: 0.8142
+epoch 30 run-time: 7.79
+epoch 30 validation loss: 0.862 validation acc: 0.7934
+epoch 30 training loss: 0.7601 training acc: 0.8152
+epoch 31 run-time: 7.79
+epoch 31 validation loss: 0.8145 validation acc: 0.8069
+epoch 31 training loss: 0.7573 training acc: 0.8161
+epoch 32 run-time: 7.79
+epoch 32 validation loss: 0.8286 validation acc: 0.8008
+epoch 32 training loss: 0.7557 training acc: 0.817
+epoch 33 run-time: 7.8
+epoch 33 validation loss: 0.8377 validation acc: 0.8045
+epoch 33 training loss: 0.7552 training acc: 0.8169
+epoch 34 run-time: 7.81
+epoch 34 validation loss: 0.8385 validation acc: 0.803
+epoch 34 training loss: 0.7536 training acc: 0.8177
+epoch 35 run-time: 7.8
+epoch 35 validation loss: 0.8222 validation acc: 0.8023
+epoch 35 training loss: 0.7507 training acc: 0.8183
+epoch 36 run-time: 7.83
+epoch 36 validation loss: 0.8277 validation acc: 0.8045
+epoch 36 training loss: 0.7486 training acc: 0.8194
+epoch 37 run-time: 7.84
+epoch 37 validation loss: 0.8364 validation acc: 0.8025
+epoch 37 training loss: 0.7479 training acc: 0.8195
+epoch 38 run-time: 7.81
+epoch 38 validation loss: 0.8395 validation acc: 0.8027
+epoch 38 training loss: 0.7469 training acc: 0.8203
+epoch 39 run-time: 7.83
+epoch 39 validation loss: 0.8419 validation acc: 0.8036
+epoch 39 training loss: 0.7444 training acc: 0.8206
+epoch 40 run-time: 7.84
+epoch 40 validation loss: 0.8431 validation acc: 0.8038
+epoch 40 training loss: 0.7425 training acc: 0.8212
+epoch 41 run-time: 7.83
+epoch 41 validation loss: 0.8216 validation acc: 0.8027
+epoch 41 training loss: 0.7418 training acc: 0.822
+epoch 42 run-time: 7.83
+epoch 42 validation loss: 0.8226 validation acc: 0.8103
+epoch 42 training loss: 0.7402 training acc: 0.8223
+epoch 43 run-time: 7.86
+epoch 43 validation loss: 0.8658 validation acc: 0.7949
+epoch 43 training loss: 0.7407 training acc: 0.8219
+epoch 44 run-time: 7.84
+epoch 44 validation loss: 0.8441 validation acc: 0.8064
+epoch 44 training loss: 0.7385 training acc: 0.8229
+epoch 45 run-time: 7.84
+epoch 45 validation loss: 0.8429 validation acc: 0.7995
+epoch 45 training loss: 0.7399 training acc: 0.8227
+epoch 46 run-time: 7.84
+epoch 46 validation loss: 0.8394 validation acc: 0.8012
+epoch 46 training loss: 0.7366 training acc: 0.8237
+epoch 47 run-time: 7.85
+epoch 47 validation loss: 0.8211 validation acc: 0.809
+epoch 47 training loss: 0.7347 training acc: 0.8246
+epoch 48 run-time: 7.85
+epoch 48 validation loss: 0.8451 validation acc: 0.8032
+epoch 48 training loss: 0.7353 training acc: 0.8245
+epoch 49 run-time: 7.86
+epoch 49 validation loss: 0.8159 validation acc: 0.8056
+epoch 49 training loss: 0.7336 training acc: 0.8248
+2019-09-16 14:35:57.389728: F tensorflow/core/framework/tensor_shape.cc:332] Check failed: 0 <= new_num_elements (0 vs. -1)

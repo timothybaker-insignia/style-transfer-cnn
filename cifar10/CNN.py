@@ -89,7 +89,7 @@ def mariana(num_classes, input_channels, keepprob=1.0):
     cifar10cnn.addLayer('convolution', 2, 32, 64, activation='relu')
     cifar10cnn.addLayer('inception', 2, 64, 32, activation='relu')
     cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
+    #cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
     # convolution layer 2
     cifar10cnn.addLayer('convolution', 2, 32, 64, activation='relu')
     cifar10cnn.addLayer('convolution', 2, 64, 128, activation='relu')
@@ -99,28 +99,23 @@ def mariana(num_classes, input_channels, keepprob=1.0):
     # convolution layer 3
     cifar10cnn.addLayer('convolution', 2, 64, 128, activation='relu')
     cifar10cnn.addLayer('convolution', 2, 128, 256, activation='relu')
-    cifar10cnn.addLayer('inception', 2, 256, 128, activation='relu')
+    cifar10cnn.addLayer('inception', 2, 256, 64, activation='relu')
     cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 4
+    #cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
+    # convolution layer 3
+    cifar10cnn.addLayer('convolution', 2, 64, 128, activation='relu')
     cifar10cnn.addLayer('convolution', 2, 128, 256, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 256, 512, activation='relu')
-    cifar10cnn.addLayer('inception', 2, 512, 256, activation='relu')
+    cifar10cnn.addLayer('inception', 2, 256, 512, activation='relu')
     cifar10cnn.addLayer('maxpooling', 2)
     cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 5
-    cifar10cnn.addLayer('convolution', 2, 256, 512, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 512, 1024, activation='relu')
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
+    # convolution layer 4  
+    cifar10cnn.addLayer('flatten', 2, activation='none')
+    #cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
     # fully connected layer 1
-    cifar10cnn.addLayer('connected', 1, 1024, 2048, activation='none')
-    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
-    # fully connected layer 2
     cifar10cnn.addLayer('connected', 1, 2048, 4096, activation='none')
-    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
-    # fully connected layer 3
-    cifar10cnn.addLayer('connected', 1, 4096, num_classes, activation='none')
+    #cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
+    # fully connected layer 1
+    cifar10cnn.addLayer('connected', 1, 496, num_classes, activation='none')
     return cifar10cnn
 
 def cifar10Model(num_classes, input_channels, keepprob=1.0):

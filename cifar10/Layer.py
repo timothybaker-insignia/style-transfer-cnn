@@ -17,7 +17,7 @@ class Layer:
         self.padding = 'SAME'
         self.kernelsize = 3
         self.stride = 1
-        self.layertypes = ['convolution', 'inception', 'connected', 'dropout', 'maxpooling']
+        self.layertypes = ['convolution', 'inception', 'connected', 'dropout', 'maxpooling', 'flatten']
         self.paddingtypes = ['SAME', 'VALID']
         self.activations = ['relu', 'leaky relu', 'softmax', 'none']
         
@@ -165,6 +165,8 @@ class Layer:
                 batch = self.dropout(batch)
             elif self.layertype == 'maxpooling':
                 batch = self.maxPooling(batch)
+            elif self.layertype == 'flatten':
+                batch = self.flatten(batch)
             else:
                 raise ValueError('Invalid layertype:', self.layertype)
         elif self.dimensions == 2:
@@ -178,6 +180,8 @@ class Layer:
                 batch = self.dropout(batch)
             elif self.layertype == 'maxpooling':
                 batch = self.maxPooling(batch)
+            elif self.layertype == 'flatten':
+                batch = self.flatten(batch)
             else:
                 raise ValueError('Invalid layertype:', self.layertype)
         elif self.dimensions == 3:
@@ -191,11 +195,16 @@ class Layer:
                 batch = self.dropout(batch)
             elif self.layertype == 'maxpooling':
                 batch = self.maxPooling(batch)
+            elif self.layertype == 'flatten':
+                batch = self.flatten(batch)
             else:
                 raise ValueError('Invalid layertype:', self.layertype)
         else:
             raise ValueError('Invalid Dimensions:', self.dimensions)      
         return batch
+
+    def flatten(self, batch):
+        return tf.reshape(batch, [256, -1])
 
     def maxPooling(self, batch):
         if self.dimensions == 1:
