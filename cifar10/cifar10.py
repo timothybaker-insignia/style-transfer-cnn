@@ -31,9 +31,9 @@ TEST_ONLY             =    False    # skips training
 SAVEDMODEL            =    False    # saves SavedModel object for deploy
 
 # Tunable Parameters
-BATCH_SIZE            =    256      # training batch size
-BUFFER_SIZE           =    1       # number of batches to buffer
-EPOCHS                =    20        # number of epochs to train for
+BATCH_SIZE            =    32      # training batch size
+BUFFER_SIZE           =    1      # number of batches to buffer
+EPOCHS                =    100        # number of epochs to train for
 LEARNING_RATE         =    1e-4     # learning rate for gradient descent
 KEEP_PROB             =    0.5      # keep probability for dropout layers
 LAMBDA_REG            =    0.01      # lambda for kernel regularization
@@ -258,13 +258,14 @@ def main():
         print("initializing graph...")
         sys.stdout.flush()
         
+        sess.run(tf.global_variables_initializer())
+
         if RESTORE_MODEL:
             try:
                 saver.restore(sess, CHECKPOINT_PATH + "model.ckpt")
             except ValueError as err:
                 pass
         
-        sess.run(tf.global_variables_initializer())
         tf.get_default_graph().finalize()      
 
         print("training session starting...")

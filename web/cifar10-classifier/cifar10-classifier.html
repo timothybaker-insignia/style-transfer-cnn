@@ -1,0 +1,129 @@
+<!DOCTYPE html>  
+<html>
+    <head>
+      <title>Cifar10 Classifier</title>
+      <link class="jsbin" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/base/jquery-ui.css" />
+      <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+      <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
+      <script>
+        function readURL(input) {
+          if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#userimage')
+                    .attr('src', e.target.result)
+                    .width(600)
+                    .height(480)
+            };
+
+            reader.readAsDataURL(input.files[0]);
+          }
+        }      
+      </script>
+      <style>
+        .animation {
+          text-align: left;
+          width: 100px;
+          height: 100px;
+          background-color: red;
+          position: relative;
+          -webkit-animation-name: colorbox; /* Safari 4.0 - 8.0 */
+          -webkit-animation-duration: 10s; /* Safari 4.0 - 8.0 */
+          -webkit-animation-iteration-count: 1; /* Safari 4.0 - 8.0 */
+          animation-name: colorbox;
+          animation-duration: 10s;
+          animation-iteration-count: 1;
+        }
+
+        /* Safari 4.0 - 8.0 */
+        @-webkit-keyframes colorbox {
+          0%   {background-color:red; left:0px; top:0px;}
+          25%  {background-color:yellow; left:200px; top:0px;}
+          50%  {background-color:blue; left:200px; top:200px;}
+          75%  {background-color:green; left:0px; top:200px;}
+          100% {background-color:red; left:0px; top:0px;}
+        }
+
+        /* Standard syntax */
+        @keyframes colorbox {
+          0%   {background-color:red; left:0px; top:0px;}
+          8%   {background-color:pink; left:0px; top:0px;}
+          16%  {background-color:yellow; left:50px; top:0px;}
+          24%  {background-color:green; left:100px; top:0px;}
+          32%  {background-color:blue; left:150px; top:0px;}
+          41%  {background-color:purple; left:200px; top:0px;}
+          50%  {background-color:red; left:250px; top:0px;}
+          58%  {background-color:pink; left:300px; top:0px;}
+          67%  {background-color:yellow; left:350px; top:0px;}
+          75%  {background-color:green; left:400px; top:0px;}
+          83%  {background-color:blue; left:450px; top:0px;}
+          92%  {background-color:purple; left:500px; top:0px;}
+          100% {background-color:red; left:500px; top:0px;}
+        }
+        form{
+          text-align: left;
+          margin: auto;
+          width: 720px;
+        }
+        body {
+            background-color: black;
+            color: white;
+        }
+        .userimage {
+          width: 600px;
+          height: 480px;
+          background-color: Gray;
+        }
+        .submit-button {
+            padding-top: 10px;
+            float: left;
+            width: 600px;
+            height: 100px;
+            margin: auto;   
+            font-size: 2em;
+            text-align: center;
+        }
+        .file-select-button {
+            font-size: 1em;
+            height: 40px;
+            width: 100px;
+        }
+        h1{
+           color: white;
+           text-align: center;
+           margin-left: -300px;
+        }
+      </style>
+    </head>
+    <body>
+      <header></header>
+      <form method="post" action="cifar10-classifier.php" enctype="multipart/form-data">
+        <table>
+          <tr>
+            <div class="animation"></div>
+          </tr>
+          <tr>
+              <td><h1>Cifar10 Classifer</h1></td>
+          </tr>
+          <tr>
+             <td>Select an image:</td> 
+          </tr>
+          <tr>
+             <td><input class="file-select-button" type="file" id="userfile" name="userfile" onchange="readURL(this);" required></td>
+          </tr>
+          <tr>
+            <td><div class="userimage"><img src="#" id="userimage"></div></td>
+          </tr>
+          <tr>
+             <td>
+                <div>
+                  <input class="submit-button" type="submit" name="submit" value="Upload Image" > 
+                </div>
+             </td>
+          </tr>
+        </table>
+      </form>
+      <footer></footer>
+    </body>
+  </html>
