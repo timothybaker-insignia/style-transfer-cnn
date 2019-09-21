@@ -5,11 +5,11 @@ import tensorflow as tf
 from Layer import Layer
          
 class CNN:
-    def __init__(self, batch_size=1):
+    def __init__(self):
         self.layers = []
         self.finalized = False
-        self.batch_size = batch_size
         self.layer_one = True
+ 
 
     def addLayer(self, layertype, keepprob=1.0):
         if not layertype in ['maxpooling', 'dropout']:
@@ -81,133 +81,53 @@ def cifar10ModelInception(num_classes, keepprob):
     cifar10cnn.addLayer('connected', 1, 1024, num_classes, activation='none')
     return cifar10cnn
 
-def cifar10ModelMariana(num_classes, keepprob=1.0):
+def mariana(num_classes, input_channels, keepprob=1.0):
     # create network model for training cifar 10
     cifar10cnn = CNN()
     # convolution layer 1
-    cifar10cnn.addLayer('convolution', 2, 3, 32, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 32, 32, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 32, 32, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 32, 32, activation='relu')
+    cifar10cnn.addLayer('convolution', 2, input_channels, 32, activation='relu')
+    cifar10cnn.addLayer('convolution', 2, 32, 64, activation='relu')
+    cifar10cnn.addLayer('inception', 2, 64, 32, activation='relu')
     cifar10cnn.addLayer('maxpooling', 2)
     cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
     # convolution layer 2
     cifar10cnn.addLayer('convolution', 2, 32, 64, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 64, 64, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 64, 64, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 64, 64, activation='relu')
+    cifar10cnn.addLayer('convolution', 2, 64, 128, activation='relu')
+    cifar10cnn.addLayer('inception', 2, 128, 64, activation='relu')
     cifar10cnn.addLayer('maxpooling', 2)
     cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
     # convolution layer 3
     cifar10cnn.addLayer('convolution', 2, 64, 128, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 128, 128, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 128, 128, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 128, 128, activation='relu')
+    cifar10cnn.addLayer('convolution', 2, 128, 256, activation='relu')
+    cifar10cnn.addLayer('inception', 2, 256, 128, activation='relu')
     cifar10cnn.addLayer('maxpooling', 2)
     cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
     # convolution layer 4
     cifar10cnn.addLayer('convolution', 2, 128, 256, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 256, 256, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 256, 256, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 256, 256, activation='relu')
+    cifar10cnn.addLayer('convolution', 2, 256, 512, activation='relu')
+    cifar10cnn.addLayer('inception', 2, 512, 256, activation='relu')
     cifar10cnn.addLayer('maxpooling', 2)
     cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
     # convolution layer 5
     cifar10cnn.addLayer('convolution', 2, 256, 512, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 512, 512, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 512, 512, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 512, 512, activation='relu')
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
-    # fully connected layer 1
-    cifar10cnn.addLayer('connected', 1, 512, 2048, activation='none')
-    # fully connected layer 2
-    cifar10cnn.addLayer('connected', 1, 2048, num_classes, activation='none')
-    return cifar10cnn
-
-def cifar10ModelDeep(num_classes, keepprob=1.0):
-    # create network model for training cifar 10
-    cifar10cnn = CNN()
-    # convolution layer 1
-    cifar10cnn.addLayer('convolution', 2, 3, 32, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 32, 32, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 32, 32, activation='relu')
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 2
-    cifar10cnn.addLayer('convolution', 2, 32, 64, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 64, 64, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 64, 64, activation='relu')
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 3
-    cifar10cnn.addLayer('convolution', 2, 64, 128, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 128, 128, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 128, 128, activation='relu')
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 4
-    cifar10cnn.addLayer('convolution', 2, 128, 256, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 256, 256, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 256, 256, activation='relu')
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 5
-    cifar10cnn.addLayer('convolution', 2, 256, 512, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 512, 512, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 512, 512, activation='relu')
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
-    # fully connected layer 1
-    cifar10cnn.addLayer('connected', 1, 512, 1024, activation='none')
-    # fully connected layer 2
-    cifar10cnn.addLayer('connected', 1, 1024, num_classes, activation='none')
-    return cifar10cnn
- 
-def cifar10ModelDeep2(num_classes, keepprob=1.0):
-    # create network model for training cifar 10
-    cifar10cnn = CNN()
-    # convolution layer 1
-    cifar10cnn.addLayer('convolution', 2, 3, 32, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 32, 32, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 32, 64, activation='relu')
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 2
-    cifar10cnn.addLayer('convolution', 2, 64, 128, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 128, 128, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 128, 256, activation='relu')
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 3
-    cifar10cnn.addLayer('convolution', 2, 256, 512, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 512, 512, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 512, 128, activation='relu')
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 4
-    cifar10cnn.addLayer('convolution', 2, 128, 256, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 256, 256, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 256, 512, activation='relu')
-    cifar10cnn.addLayer('maxpooling', 2)
-    cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
-    # convolution layer 5
     cifar10cnn.addLayer('convolution', 2, 512, 1024, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 1024, 1024, activation='relu')
-    cifar10cnn.addLayer('convolution', 2, 1024, 2048, activation='relu')
     cifar10cnn.addLayer('maxpooling', 2)
     cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
     # fully connected layer 1
-    cifar10cnn.addLayer('connected', 1, 2048, 4096, activation='none')
+    cifar10cnn.addLayer('connected', 1, 1024, 2048, activation='none')
+    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
     # fully connected layer 2
+    cifar10cnn.addLayer('connected', 1, 2048, 4096, activation='none')
+    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
+    # fully connected layer 3
     cifar10cnn.addLayer('connected', 1, 4096, num_classes, activation='none')
     return cifar10cnn
 
-def cifar10Model(num_classes, keepprob=1.0):
+def cifar10Model(num_classes, input_channels, keepprob=1.0):
     # create network model for training cifar 10
     cifar10cnn = CNN()
     # convolution layer 1
-    cifar10cnn.addLayer('convolution', 2, 3, 32, activation='relu')
+    cifar10cnn.addLayer('convolution', 2, input_channels, 32, activation='relu')
     cifar10cnn.addLayer('convolution', 2, 32, 32, activation='relu')
     cifar10cnn.addLayer('maxpooling', 2)
     cifar10cnn.addLayer('dropout', 2, keepprob=keepprob)
@@ -232,9 +152,10 @@ def cifar10Model(num_classes, keepprob=1.0):
     cifar10cnn.addLayer('maxpooling', 2)
     cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
     # fully connected layer 1
-    cifar10cnn.addLayer('connected', 1, 512, 1024, activation='none')
+    cifar10cnn.addLayer('connected', 1, 512, 4096, activation='none')
+    cifar10cnn.addLayer('dropout', 1, keepprob=keepprob)
     # fully connected layer 2
-    cifar10cnn.addLayer('connected', 1, 1024, num_classes, activation='none')
+    cifar10cnn.addLayer('connected', 1, 4096, num_classes, activation='none')
     return cifar10cnn
         
         

@@ -1,2 +1,3 @@
 cifar10/data/
 cifar10/output/
+cifar10/checkpoint/
